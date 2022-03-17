@@ -31,8 +31,10 @@ runs:
         TAG: ${{ inputs.tag }}
       run: |
         echo "Deleting old $TAG tag if it exists"
+        # Delete tag via GitHub API
+        # https://docs.github.com/en/rest/reference/git#delete-a-reference
         curl -s \
-        -X DELETE https://api.github.com/repos/${{ github.repository }}/git/refs/tags/$TAG \
+        -X DELETE https://api.github.com/repos/${{ github.repository }}/git/refs/$TAG \
         -H "Accept: application/vnd.github.v3+json" \
         -H "Authorization: token ${{ github.token }}"
 
@@ -46,7 +48,7 @@ runs:
         # Create new tag via GitHub API
         # https://docs.github.com/en/rest/reference/git#create-a-reference
         curl -s \
-        -X POST https://api.github.com/repos/${{ github.repository }}/git/tags \
+        -X POST https://api.github.com/repos/${{ github.repository }}/git/refs \
         -H "Accept: application/vnd.github.v3+json" \
         -H "Authorization: token ${{ github.token }}" \
         -d @- << EOF
