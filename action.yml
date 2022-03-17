@@ -54,7 +54,7 @@ runs:
         -d @- << EOF
         {
           "sha": "$SHA",
-          "ref": "$TAG"
+          "ref": "refs/tags/$TAG"
         }
         EOF
         echo "New tag $TAG created with sha $SHA"
