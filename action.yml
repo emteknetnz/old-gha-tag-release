@@ -19,14 +19,14 @@ inputs:
     type: string
     required: false
     default: ''
+# Add string inputs to memory instead of using string substitution in shell script
+# https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
+env:
+  SHA: ${{ inputs.branch }}
+  TAG: ${{ inputs.tag }}
+  BODY: ${{ inputs.body }}
 runs:
   using: composite
-  # Add string inputs to memory instead of using string substitution in shell script
-  # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
-  env:
-    SHA: ${{ inputs.branch }}
-    TAG: ${{ inputs.tag }}
-    BODY: ${{ inputs.body }}
   steps:
     - name: Delete existing tag if one exists
       if: ${{ inputs.delete_existing }}
