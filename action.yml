@@ -1,7 +1,7 @@
 name: Tag and release
 description: GitHub Action to create a tag and an optional release
 inputs:
-  branch:
+  sha:
     type: string
     required: true
   tag:
@@ -24,18 +24,10 @@ runs:
   # Add string inputs to memory instead of using string substitution in shell script
   # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
   env:
+    SHA: ${{ inputs.branch }}
     TAG: ${{ inputs.tag }}
-    BRANCH: ${{ inputs.branch }}
+    BODY: ${{ inputs.body }}
   steps:
-    - name: Generate sha
-      id: generate_sha
-      shell: bash
-      run: |
-        # It is assumed you haveve already run actions/checkout in the action/workflow that called this action
-        SHA=$(git rev-parse $BRANCH)
-        if ! [[ "$SHA" =~ ^[a-f0-9]{40}$ ]]; then echo "Invalid sha" && exit 1; fi
-        echo "::set-output name=sha::${SHA}"
-
     - name: Delete existing tag if one exists
       if: ${{ inputs.delete_existing }}
       shell: bash
@@ -49,7 +41,7 @@ runs:
     - name: Create tag
       shell: bash
       run: |        
-        SHA=${{ steps.generate_sha.outputs.sha }}             
+        SHA=${{ github.sha }}             
         # Create new tag via GitHub API
         # https://docs.github.com/en/rest/reference/git#create-a-reference
         curl -s \
@@ -58,11 +50,13 @@ runs:
         -H "Authorization: token ${{ github.token }}" \
         -d @- << EOF
         {
-          "tag": "$TAG",
-          "sha": "$SHA"
+          "sha": "$SHA",
+          "tag": "$TAG"
         }
         EOF
         echo "New tag $TAG created with sha $SHA"
+
+# Note: untestested below this line:
 
     - name: Delete existing release if one exists
       if: ${{ inputs.release && inputs.delete_existing }}
